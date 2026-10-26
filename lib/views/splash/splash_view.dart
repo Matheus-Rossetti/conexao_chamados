@@ -1,3 +1,4 @@
+import 'package:avaliacao_final_sctec/core/routes.dart';
 import 'package:avaliacao_final_sctec/views/splash/splash_viewmodel.dart';
 import 'package:flutter/material.dart';
 
@@ -24,8 +25,11 @@ class _SplashViewState extends State<SplashView> {
 
     final signedIn = await vm.isUserSignedIn();
 
+    print('RESULTADO DO DEBUG: $signedIn');
+
     if(!mounted) return;
-    signedIn ? Navigator.of(context).pushNamed("/home") : Navigator.of(context).pushNamed("/auth");
+    signedIn ? Navigator.of(context).pushNamed(AppRoutes.home) : Navigator.of(context).pushNamed(AppRoutes.auth);
+
   }
 
   @override
