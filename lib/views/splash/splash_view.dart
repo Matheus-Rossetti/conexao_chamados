@@ -25,7 +25,7 @@ class _SplashViewState extends State<SplashView> {
     final signedIn = await vm.isUserSignedIn();
 
     if(!mounted) return;
-    signedIn ? Navigator.of(context).pushNamed("/list") : Navigator.of(context).pushNamed("/auth");
+    signedIn ? Navigator.of(context).pushNamed("/home") : Navigator.of(context).pushNamed("/auth");
   }
 
   @override
