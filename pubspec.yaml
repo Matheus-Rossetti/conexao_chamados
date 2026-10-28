@@ -11,6 +11,8 @@ dependencies:
     sdk: flutter
   flutter_secure_storage: ^11.2.0
   get_it: ^9.3.0
+  dio: ^5.4.0
+  crypto: ^3.0.5
 
 dev_dependencies:
   flutter_test:
