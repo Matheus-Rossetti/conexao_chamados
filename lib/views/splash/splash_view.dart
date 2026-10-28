@@ -24,12 +24,10 @@ class _SplashViewState extends State<SplashView> {
 
     final signedIn = await vm.isUserSignedIn();
 
-    print('RESULTADO DO DEBUG: $signedIn');
-
     if (!mounted) return;
     signedIn
-        ? Navigator.of(context).pushNamed(AppRoutes.home)
-        : Navigator.of(context).pushNamed(AppRoutes.auth);
+        ? Navigator.of(context).pushReplacementNamed(AppRoutes.home)
+        : Navigator.of(context).pushReplacementNamed(AppRoutes.auth);
   }
 
   @override
