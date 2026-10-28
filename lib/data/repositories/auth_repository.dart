@@ -25,10 +25,17 @@ class AuthRepository {
     final senhaHmac = computeHmac(password);
     final result = await _authService.login(email: email, senhaHmac: senhaHmac);
 
-    final token =
-        result['token'] ?? result['access_token'] ?? result['accessToken'];
-    if (token != null) {
+    if (result['sucesso'] == false) {
+      throw Exception(result['mensagem'] ?? 'Falha no login');
+    }
+
+    final dados = result['dados'];
+    final token = (dados is Map ? dados['token'] : null) ?? result['token'];
+
+    if (token != null && token.toString().isNotEmpty) {
       await _secureStorage.write(key: 'token', value: token.toString());
+    } else {
+      throw Exception('Token não encontrado na resposta do servidor');
     }
   }
 }
