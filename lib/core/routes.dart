@@ -4,8 +4,14 @@ import 'package:flutter/material.dart';
 
 import '../views/home/home_view.dart';
 
+abstract class AppRoutes {
+  static const splash = '/';
+  static const auth = '/auth';
+  static const home = '/home';
+}
+
 final Map<String, Widget Function(BuildContext)> appRoutes = {
-  '/': (context) => SplashView(),
-  'auth': (context) => AuthView(),
-  'home': (context) => HomeView(),
+  AppRoutes.splash: (context) => SplashView(),
+  AppRoutes.auth: (context) => AuthView(),
+  AppRoutes.home: (context) => HomeView(),
 };

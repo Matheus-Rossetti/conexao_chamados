@@ -1,17 +1,8 @@
-<<<<<<< Updated upstream
-import 'package:avaliacao_final_sctec/views/home/home_viewmodel.dart';
-import 'package:flutter/material.dart';
-
-class HomeView extends StatefulWidget {
-
-  final vm = HomeViewmodel();
-=======
 import 'package:flutter/material.dart';
 
 import '../../core/app_colors.dart';
 import '../widgets/ticket_card.dart';
 import 'home_viewmodel.dart';
->>>>>>> Stashed changes
 
 class HomeView extends StatelessWidget {
   const HomeView({super.key});
@@ -23,9 +14,6 @@ class HomeView extends StatelessWidget {
     final tickets = vm.activeTickets;
 
     return Scaffold(
-<<<<<<< Updated upstream
-      backgroundColor: Colors.amber,
-=======
       backgroundColor: AppColors.deepNavy,
       body: SafeArea(
         child: CustomScrollView(
@@ -136,7 +124,6 @@ class HomeView extends StatelessWidget {
           ],
         ),
       ),
->>>>>>> Stashed changes
     );
   }
 }

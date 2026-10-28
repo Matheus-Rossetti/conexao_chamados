@@ -1,8 +1,10 @@
+import 'package:avaliacao_final_sctec/core/dependecies.dart';
 import 'package:flutter/material.dart';
 
 import 'core/routes.dart';
 
 void main() {
+  initDependencies();
   runApp(const MainApp());
 }
 
