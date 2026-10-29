@@ -12,6 +12,9 @@ class TicketModel {
   final String status;
   final String createdAt;
 
+  double? distanceMeters;
+  String distanceFormatted;
+
   TicketModel({
     required this.id,
     required this.clientCode,
@@ -25,6 +28,8 @@ class TicketModel {
     required this.longitude,
     required this.status,
     required this.createdAt,
+    this.distanceMeters,
+    this.distanceFormatted = '1.5 km',
   });
 
   factory TicketModel.fromJson(Map<String, dynamic> json) {

@@ -189,7 +189,7 @@ class TicketCard extends StatelessWidget {
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    '1.5 km',
+                    ticket.distanceFormatted,
                     style: const TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.bold,

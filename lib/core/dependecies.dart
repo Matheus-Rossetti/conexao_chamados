@@ -3,10 +3,11 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:dio/dio.dart';
 
 import '../data/services/auth_service.dart';
-
 import '../data/services/ticket_service.dart';
+import '../data/services/location_service.dart';
 import '../data/repositories/auth_repository.dart';
 import '../data/repositories/ticket_repository.dart';
+import '../data/repositories/location_repository.dart';
 import '../data/services/local_db_service.dart';
 
 final dependencies = GetIt.instance;
@@ -27,6 +28,9 @@ Future<void> initDependencies() async {
       secureStorage: dependencies<FlutterSecureStorage>(),
     ),
   );
+  dependencies.registerLazySingleton<LocationService>(
+    () => LocationServiceImpl(),
+  );
   dependencies.registerLazySingleton<AuthRepository>(
     () => AuthRepository(
       dependencies<AuthService>(),
@@ -38,6 +42,9 @@ Future<void> initDependencies() async {
       dependencies<TicketService>(),
       dependencies<LocalDbService>(),
     ),
+  );
+  dependencies.registerLazySingleton<LocationRepository>(
+    () => LocationRepository(dependencies<LocationService>()),
   );
 
   final localDbService = LocalDbService();

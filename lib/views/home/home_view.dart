@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/app_colors.dart';
+import '../../data/models/ticket_model.dart';
 import '../widgets/ticket_card.dart';
 import 'home_viewmodel.dart';
 
@@ -38,9 +39,14 @@ class _HomeViewState extends State<HomeView> {
   }
 
   @override
+  void dispose() {
+    vm.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final technicianName = _technicianName;
-    final tickets = vm.tickets;
 
     return Scaffold(
       backgroundColor: AppColors.deepNavy,
@@ -78,36 +84,41 @@ class _HomeViewState extends State<HomeView> {
                       ),
                     ),
                     // Active count badge
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 8,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.darkSlateBlue,
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(
-                          color: AppColors.accentSky.withValues(alpha: 0.3),
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(
-                            Icons.assignment_rounded,
-                            size: 16,
-                            color: AppColors.accentSky,
+                    ValueListenableBuilder<List<TicketModel>>(
+                      valueListenable: vm.tickets,
+                      builder: (context, tickets, child) {
+                        return Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 8,
                           ),
-                          const SizedBox(width: 6),
-                          Text(
-                            '${tickets.length} Ativos',
-                            style: const TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.accentSky,
+                          decoration: BoxDecoration(
+                            color: AppColors.darkSlateBlue,
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(
+                              color: AppColors.accentSky.withValues(alpha: 0.3),
                             ),
                           ),
-                        ],
-                      ),
+                          child: Row(
+                            children: [
+                              const Icon(
+                                Icons.assignment_rounded,
+                                size: 16,
+                                color: AppColors.accentSky,
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                '${tickets.length} Ativos',
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.accentSky,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
                     ),
                   ],
                 ),
@@ -138,23 +149,29 @@ class _HomeViewState extends State<HomeView> {
                       ),
                     ),
                   )
-                : tickets.isEmpty
-                ? const SliverFillRemaining(
-                    child: Center(
-                      child: Text(
-                        'Nenhum ticket ativo no momento.',
-                        style: TextStyle(
-                          color: AppColors.textMuted,
-                          fontSize: 15,
-                        ),
-                      ),
-                    ),
-                  )
-                : SliverList(
-                    delegate: SliverChildBuilderDelegate((context, index) {
-                      final ticket = tickets[index];
-                      return TicketCard(ticket: ticket);
-                    }, childCount: tickets.length),
+                : ValueListenableBuilder<List<TicketModel>>(
+                    valueListenable: vm.tickets,
+                    builder: (context, tickets, child) {
+                      if (tickets.isEmpty) {
+                        return const SliverFillRemaining(
+                          child: Center(
+                            child: Text(
+                              'Nenhum ticket ativo no momento.',
+                              style: TextStyle(
+                                color: AppColors.textMuted,
+                                fontSize: 15,
+                              ),
+                            ),
+                          ),
+                        );
+                      }
+                      return SliverList(
+                        delegate: SliverChildBuilderDelegate((context, index) {
+                          final ticket = tickets[index];
+                          return TicketCard(ticket: ticket);
+                        }, childCount: tickets.length),
+                      );
+                    },
                   ),
             const SliverToBoxAdapter(child: SizedBox(height: 24)),
           ],
