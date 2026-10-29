@@ -1,10 +1,8 @@
-
 import 'package:flutter/material.dart';
 
 import '../../core/app_colors.dart';
 import '../widgets/ticket_card.dart';
 import 'home_viewmodel.dart';
-
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -16,6 +14,7 @@ class HomeView extends StatefulWidget {
 class _HomeViewState extends State<HomeView> {
   final vm = HomeViewmodel();
   bool _isLoading = true;
+  String _technicianName = "Técnico";
 
   @override
   void initState() {
@@ -27,16 +26,20 @@ class _HomeViewState extends State<HomeView> {
     setState(() {
       _isLoading = true;
     });
+
+    final name = await vm.getTechnicianName();
     await vm.loadTickets();
+
     if (!mounted) return;
     setState(() {
+      _technicianName = name;
       _isLoading = false;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final technicianName = vm.technicianName;
+    final technicianName = _technicianName;
     final tickets = vm.tickets;
 
     return Scaffold(
@@ -44,7 +47,6 @@ class _HomeViewState extends State<HomeView> {
       body: SafeArea(
         child: CustomScrollView(
           slivers: [
-            // Header without AppBar, Email, or Profile Picture
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.all(20.0),
@@ -127,7 +129,7 @@ class _HomeViewState extends State<HomeView> {
               ),
             ),
 
-            // Lazy List of Tickets
+            // List of Tickets
             _isLoading
                 ? const SliverFillRemaining(
                     child: Center(
