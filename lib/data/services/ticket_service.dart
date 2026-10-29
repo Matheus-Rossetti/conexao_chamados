@@ -1,24 +1,29 @@
 import 'package:dio/dio.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-import 'auth_service.dart';
+abstract class TicketService {
+  Future<Map<String, dynamic>> fetchTickets();
+}
 
-class AuthServiceImpl implements AuthService {
+class TicketServiceDioImpl implements TicketService {
   final Dio dio;
+  final FlutterSecureStorage secureStorage;
 
-  AuthServiceImpl({Dio? dio})
-    : dio =
-          dio ??
-          Dio(BaseOptions(baseUrl: 'https://oquetemnomeucosmetico.com.br/api'));
+  TicketServiceDioImpl({required this.dio, required this.secureStorage});
 
   @override
-  Future<Map<String, dynamic>> login({
-    required String email,
-    required String senhaHmac,
-  }) async {
+  Future<Map<String, dynamic>> fetchTickets() async {
     try {
-      final response = await dio.post(
-        '/login',
-        data: {'email': email, 'senha_hmac': senhaHmac},
+      final token = await secureStorage.read(key: 'token');
+
+      final response = await dio.get(
+        '/chamados',
+        options: Options(
+          headers: {
+            if (token != null && token.isNotEmpty)
+              'Authorization': 'Bearer $token',
+          },
+        ),
       );
 
       if (response.statusCode != null &&
@@ -31,10 +36,10 @@ class AuthServiceImpl implements AuthService {
         }
         return {};
       } else {
-        throw Exception('Erro ao realizar login');
+        throw Exception('Erro ao buscar chamados');
       }
     } on DioException catch (e) {
-      String errorMessage = 'Erro ao realizar login';
+      String errorMessage = 'Erro ao buscar chamados';
       if (e.response?.data != null) {
         final data = e.response?.data;
         if (data is Map && data.containsKey('message')) {

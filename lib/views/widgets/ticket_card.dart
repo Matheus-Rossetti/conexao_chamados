@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
 import '../../core/app_colors.dart';
-import '../home/home_viewmodel.dart';
+import '../../data/models/ticket_model.dart';
 
 class TicketCard extends StatelessWidget {
-  final MockTicket ticket;
+  final TicketModel ticket;
 
   const TicketCard({super.key, required this.ticket});
 
@@ -164,23 +164,17 @@ class TicketCard extends StatelessWidget {
               Row(
                 children: [
                   Icon(
-                    ticket.isSynced
-                        ? Icons.cloud_done_rounded
-                        : Icons.cloud_sync_rounded,
+                    Icons.cloud_done_rounded,
                     size: 16,
-                    color: ticket.isSynced
-                        ? Colors.green.shade600
-                        : Colors.orange.shade700,
+                    color: Colors.green.shade600,
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    ticket.isSynced ? 'Sincronizado' : 'Não sincronizado',
+                    'Sincronizado',
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
-                      color: ticket.isSynced
-                          ? Colors.green.shade700
-                          : Colors.orange.shade800,
+                      color: Colors.green.shade700,
                     ),
                   ),
                 ],
@@ -195,7 +189,7 @@ class TicketCard extends StatelessWidget {
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    ticket.distance,
+                    '1.5 km',
                     style: const TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.bold,

@@ -4,14 +4,38 @@ import '../../core/app_colors.dart';
 import '../widgets/ticket_card.dart';
 import 'home_viewmodel.dart';
 
-class HomeView extends StatelessWidget {
+class HomeView extends StatefulWidget {
   const HomeView({super.key});
 
   @override
+  State<HomeView> createState() => _HomeViewState();
+}
+
+class _HomeViewState extends State<HomeView> {
+  final vm = HomeViewmodel();
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    setState(() {
+      _isLoading = true;
+    });
+    await vm.loadTickets();
+    if (!mounted) return;
+    setState(() {
+      _isLoading = false;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final vm = HomeViewmodel();
     final technicianName = vm.technicianName;
-    final tickets = vm.activeTickets;
+    final tickets = vm.tickets;
 
     return Scaffold(
       backgroundColor: AppColors.deepNavy,
@@ -102,7 +126,15 @@ class HomeView extends StatelessWidget {
             ),
 
             // Lazy List of Tickets
-            tickets.isEmpty
+            _isLoading
+                ? const SliverFillRemaining(
+                    child: Center(
+                      child: CircularProgressIndicator(
+                        color: AppColors.accentSky,
+                      ),
+                    ),
+                  )
+                : tickets.isEmpty
                 ? const SliverFillRemaining(
                     child: Center(
                       child: Text(

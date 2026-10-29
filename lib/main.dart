@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 
 import 'core/routes.dart';
 
-void main() {
-  initDependencies();
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await initDependencies();
   runApp(const MainApp());
 }
 
@@ -13,8 +14,6 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      routes: appRoutes,
-    );
+    return MaterialApp(routes: appRoutes);
   }
 }
