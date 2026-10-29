@@ -6,6 +6,7 @@ import 'core/routes.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initDependencies();
+
   runApp(const MainApp());
 }
 
