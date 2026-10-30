@@ -20,6 +20,9 @@ class LocalDbService {
       onCreate: (db, version) async {
         await createTable(db);
       },
+      onConfigure: (db) async {
+        await db.execute('PRAGMA foreign_keys = ON');
+      },
     );
   }
 
@@ -39,6 +42,19 @@ class LocalDbService {
         longitude REAL,
         status TEXT,
         criado_em TEXT
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS services (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        ticket_fk INTEGER,
+        sincronizado INTEGER DEFAULT 0,
+        conclusao TEXT,
+        descricao TEXT,
+        data TEXT,
+        imagem TEXT,
+        FOREIGN KEY (ticket_fk) REFERENCES tickets (id)
       )
     ''');
   }

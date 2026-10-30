@@ -31,11 +31,18 @@ class AuthRepository {
 
     final dados = result['dados'];
     final token = (dados is Map ? dados['token'] : null) ?? result['token'];
+    final usuario = dados is Map ? dados['usuario'] : null;
+    final technicianName = (usuario is Map ? usuario['nome'] : null)
+        ?.toString();
 
     if (token != null && token.toString().isNotEmpty) {
       await _secureStorage.write(key: 'token', value: token.toString());
     } else {
       throw Exception('Token não encontrado na resposta do servidor');
+    }
+
+    if (technicianName != null && technicianName.isNotEmpty) {
+      await _secureStorage.write(key: 'technician_name', value: technicianName);
     }
   }
 }
