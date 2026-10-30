@@ -72,8 +72,8 @@ class TicketRepository {
     );
 
     final db = await _localDbService.database;
-    return await db.transaction((txn) async {
-      final serviceId = await txn.insert(
+    final serviceId = await db.transaction((txn) async {
+      final id = await txn.insert(
         'services',
         service.toMap(),
         conflictAlgorithm: ConflictAlgorithm.replace,
@@ -86,8 +86,23 @@ class TicketRepository {
         whereArgs: [ticketId],
       );
 
-      return serviceId;
+      return id;
     });
+
+    try {
+      final savedService = ServiceModel(
+        id: serviceId,
+        ticketFk: ticketId,
+        synchronized: 0,
+        conclusion: conclusion,
+        description: description,
+        date: date,
+        imagePath: imagePath,
+      );
+      await uploadServices([savedService]);
+    } catch (_) {}
+
+    return serviceId;
   }
 
   Future<void> uploadServices(List<ServiceModel> services) async {
