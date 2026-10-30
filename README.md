@@ -1,3 +1,1 @@
-# avaliacao_final_sctec
-
-A new Flutter project.
+TeleCipó a sua (pior) empresa de telecomunicação, nos orgulhamos de ter um aplicativo de chamados com foco em funcionamento offline, o que é um tanto irônico... mas melhor do que nada!
