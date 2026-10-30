@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/app_colors.dart';
@@ -123,35 +124,55 @@ class TicketCard extends StatelessWidget {
           ),
           const SizedBox(height: 14),
 
-          // Map Placeholder Space
+          // Map Image from Mapbox Static API
           Container(
-            height: 120,
+            height: 140,
             width: double.infinity,
             decoration: BoxDecoration(
-              color: AppColors.lightIcyBlue,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: AppColors.mediumSlateGray.withValues(alpha: 0.2),
               ),
             ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: const [
-                Icon(
-                  Icons.map_outlined,
-                  size: 36,
-                  color: AppColors.mediumSlateGray,
-                ),
-                SizedBox(height: 6),
-                Text(
-                  'Mapa (Em breve)',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                    color: AppColors.mediumSlateGray,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: CachedNetworkImage(
+                imageUrl:
+                    'https://api.mapbox.com/styles/v1/mapbox/streets-v12/static/pin-s+ff0000(${ticket.longitude},${ticket.latitude})/${ticket.longitude},${ticket.latitude},15/400x300@2x?access_token=pk.eyJ1IjoibWF0aGV1emRyZWhlciIsImEiOiJjbXZ1Nzh0YTAwNHB5MnhuMmE4NnVqaml0In0.MEGVyMwlzJWEj9V-2J22vQ',
+                fit: BoxFit.cover,
+                placeholder: (context, url) => Container(
+                  color: AppColors.lightIcyBlue,
+                  child: const Center(
+                    child: SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
                   ),
                 ),
-              ],
+                errorWidget: (context, url, error) => Container(
+                  color: AppColors.lightIcyBlue,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      Icon(
+                        Icons.map_outlined,
+                        size: 36,
+                        color: AppColors.mediumSlateGray,
+                      ),
+                      SizedBox(height: 6),
+                      Text(
+                        'Mapa indisponível',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.mediumSlateGray,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ),
           ),
           const SizedBox(height: 14),
