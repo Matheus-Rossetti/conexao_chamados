@@ -6,6 +6,7 @@ class ServiceModel {
   final String description;
   final String date;
   final String? imagePath;
+  final String? fotoUrl;
   final String? clientName;
   final String? clientCode;
   final String? category;
@@ -18,6 +19,7 @@ class ServiceModel {
     required this.description,
     required this.date,
     this.imagePath,
+    this.fotoUrl,
     this.clientName,
     this.clientCode,
     this.category,
@@ -38,6 +40,7 @@ class ServiceModel {
       description: map['descricao'] ?? '',
       date: map['data'] ?? '',
       imagePath: map['imagem'],
+      fotoUrl: map['foto_url'],
       clientName: map['nome_cliente'],
       clientCode: map['codigo_cliente'],
       category: map['categoria_informada'],
@@ -53,6 +56,7 @@ class ServiceModel {
       'descricao': description,
       'data': date,
       'imagem': imagePath,
+      'foto_url': fotoUrl,
     };
   }
 }

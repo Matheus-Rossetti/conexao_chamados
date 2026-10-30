@@ -3,7 +3,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 abstract class TicketService {
   Future<Map<String, dynamic>> fetchTickets();
-  Future<bool> sendService({
+  Future<String?> sendService({
     required int ticketId,
     required String conclusion,
     required String description,
@@ -62,7 +62,7 @@ class TicketServiceDioImpl implements TicketService {
   }
 
   @override
-  Future<bool> sendService({
+  Future<String?> sendService({
     required int ticketId,
     required String conclusion,
     required String description,
@@ -99,7 +99,16 @@ class TicketServiceDioImpl implements TicketService {
         ),
       );
 
-      return response.statusCode == 201;
+      if (response.statusCode == 201) {
+        final data = response.data;
+        if (data is Map) {
+          final dados = data['dados'];
+          if (dados is Map) {
+            return dados['foto_url']?.toString();
+          }
+        }
+      }
+      return null;
     } on DioException catch (e) {
       String errorMessage = 'Erro ao enviar atendimento';
       if (e.response?.data != null) {

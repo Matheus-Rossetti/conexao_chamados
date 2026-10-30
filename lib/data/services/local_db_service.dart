@@ -54,6 +54,7 @@ class LocalDbService {
         descricao TEXT,
         data TEXT,
         imagem TEXT,
+        foto_url TEXT,
         FOREIGN KEY (ticket_fk) REFERENCES tickets (id)
       )
     ''');

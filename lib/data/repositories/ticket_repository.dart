@@ -112,7 +112,7 @@ class TicketRepository {
       if (service.synchronized == 1) continue;
 
       try {
-        final success = await _ticketService.sendService(
+        final fotoUrl = await _ticketService.sendService(
           ticketId: service.ticketFk,
           conclusion: service.conclusion,
           description: service.description,
@@ -120,10 +120,13 @@ class TicketRepository {
           imagePath: service.imagePath,
         );
 
-        if (success && service.id != null) {
+        if (service.id != null) {
           await db.update(
             'services',
-            {'sincronizado': 1},
+            {
+              'sincronizado': 1,
+              if (fotoUrl != null && fotoUrl.isNotEmpty) 'foto_url': fotoUrl,
+            },
             where: 'id = ?',
             whereArgs: [service.id],
           );
