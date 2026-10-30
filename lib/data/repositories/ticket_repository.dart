@@ -107,9 +107,13 @@ class TicketRepository {
 
   Future<void> uploadServices(List<ServiceModel> services) async {
     final db = await _localDbService.database;
+    bool hasPending = false;
+    bool anySuccess = false;
+    bool networkErrorOccurred = false;
 
     for (final service in services) {
       if (service.synchronized == 1) continue;
+      hasPending = true;
 
       try {
         final fotoUrl = await _ticketService.sendService(
@@ -130,10 +134,15 @@ class TicketRepository {
             where: 'id = ?',
             whereArgs: [service.id],
           );
+          anySuccess = true;
         }
-      } catch (_) {
-        // Continue uploading remaining services even if one fails
+      } catch (e) {
+        networkErrorOccurred = true;
       }
+    }
+
+    if (hasPending && networkErrorOccurred && !anySuccess) {
+      throw Exception('Falha na sincronização: sem conexão com a internet.');
     }
   }
 }

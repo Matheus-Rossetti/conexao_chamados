@@ -60,7 +60,7 @@ class _HomeViewState extends State<HomeView> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Erro ao atualizar chamados: $e'),
+          content: Text(e.toString().replaceAll('Exception: ', '')),
           backgroundColor: AppColors.error,
         ),
       );
@@ -69,19 +69,27 @@ class _HomeViewState extends State<HomeView> {
 
   Future<void> _handleSync() async {
     try {
-      await vm.syncServices();
+      final syncedCount = await vm.syncServices();
       if (!mounted) return;
+
+      final String message;
+      if (syncedCount == 0) {
+        final hasServices = vm.services.value.isNotEmpty;
+        message = hasServices
+            ? 'Todos os atendimentos já estão sincronizados.'
+            : 'Nenhum atendimento para sincronizar.';
+      } else {
+        message = '$syncedCount atendimento(s) sincronizado(s) com sucesso!';
+      }
+
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Atendimentos sincronizados com sucesso!'),
-          backgroundColor: AppColors.success,
-        ),
+        SnackBar(content: Text(message), backgroundColor: AppColors.success),
       );
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Erro ao sincronizar atendimentos: $e'),
+          content: Text(e.toString().replaceAll('Exception: ', '')),
           backgroundColor: AppColors.error,
         ),
       );

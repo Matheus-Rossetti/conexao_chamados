@@ -52,10 +52,30 @@ class HomeViewmodel {
     services.value = _allServices;
   }
 
-  Future<void> syncServices() async {
+  Future<int> syncServices() async {
+    isOfflineMode = false;
     final servicesList = await _ticketRepository.getStoredServices();
-    await _ticketRepository.uploadServices(servicesList);
-    await loadServices();
+
+    final pendingServices = servicesList
+        .where((s) => s.synchronized == 0)
+        .toList();
+    if (pendingServices.isEmpty) {
+      return 0;
+    }
+
+    try {
+      await _ticketRepository.uploadServices(servicesList);
+      await loadServices();
+
+      final updatedList = await _ticketRepository.getStoredServices();
+      final remainingPending = updatedList
+          .where((s) => s.synchronized == 0)
+          .length;
+      return pendingServices.length - remainingPending;
+    } catch (e) {
+      isOfflineMode = true;
+      rethrow;
+    }
   }
 
   void setTab(String tab) {
