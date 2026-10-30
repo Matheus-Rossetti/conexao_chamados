@@ -464,15 +464,27 @@ class _TicketViewState extends State<TicketView> {
 
               // Submit Button
               ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
                   if (_formKey.currentState?.validate() ?? false) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Atendimento salvo com sucesso!'),
-                        backgroundColor: Colors.green,
-                      ),
-                    );
-                    Navigator.of(context).pop();
+                    try {
+                      await vm.saveAttendance();
+                      if (!context.mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Atendimento salvo com sucesso!'),
+                          backgroundColor: Colors.green,
+                        ),
+                      );
+                      Navigator.of(context).pop();
+                    } catch (e) {
+                      if (!context.mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Erro ao salvar atendimento: $e'),
+                          backgroundColor: AppColors.error,
+                        ),
+                      );
+                    }
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
