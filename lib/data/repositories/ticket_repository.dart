@@ -12,27 +12,25 @@ class TicketRepository {
   TicketRepository(this._ticketService, this._localDbService);
 
   Future<List<TicketModel>> fetchAndSaveTickets() async {
-    try {
-      final response = await _ticketService.fetchTickets();
-      final dados = response['dados'];
+    final response = await _ticketService.fetchTickets();
+    final dados = response['dados'];
 
-      if (dados is List) {
-        final tickets = dados
-            .map((item) => TicketModel.fromJson(item as Map<String, dynamic>))
-            .toList();
+    if (dados is List) {
+      final tickets = dados
+          .map((item) => TicketModel.fromJson(item as Map<String, dynamic>))
+          .toList();
 
-        final db = await _localDbService.database;
-        await db.transaction((txn) async {
-          for (final ticket in tickets) {
-            await txn.insert(
-              'tickets',
-              ticket.toMap(),
-              conflictAlgorithm: ConflictAlgorithm.ignore,
-            );
-          }
-        });
-      }
-    } catch (_) {}
+      final db = await _localDbService.database;
+      await db.transaction((txn) async {
+        for (final ticket in tickets) {
+          await txn.insert(
+            'tickets',
+            ticket.toMap(),
+            conflictAlgorithm: ConflictAlgorithm.ignore,
+          );
+        }
+      });
+    }
 
     return await getStoredTickets();
   }
@@ -90,5 +88,34 @@ class TicketRepository {
 
       return serviceId;
     });
+  }
+
+  Future<void> uploadServices(List<ServiceModel> services) async {
+    final db = await _localDbService.database;
+
+    for (final service in services) {
+      if (service.synchronized == 1) continue;
+
+      try {
+        final success = await _ticketService.sendService(
+          ticketId: service.ticketFk,
+          conclusion: service.conclusion,
+          description: service.description,
+          date: service.date,
+          imagePath: service.imagePath,
+        );
+
+        if (success && service.id != null) {
+          await db.update(
+            'services',
+            {'sincronizado': 1},
+            where: 'id = ?',
+            whereArgs: [service.id],
+          );
+        }
+      } catch (_) {
+        // Continue uploading remaining services even if one fails
+      }
+    }
   }
 }

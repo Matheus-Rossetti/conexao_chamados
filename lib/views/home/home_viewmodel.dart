@@ -19,16 +19,21 @@ class HomeViewmodel {
   final ValueNotifier<List<ServiceModel>> services = ValueNotifier([]);
   final ValueNotifier<String> selectedTab = ValueNotifier('chamados');
 
+  List<ServiceModel> _allServices = [];
+  bool isOfflineMode = false;
+
   Future<String> getTechnicianName() async {
     final name = await _secureStorage.read(key: 'technician_name');
     return (name != null && name.isNotEmpty) ? name : "Técnico";
   }
 
   Future<void> loadTickets() async {
+    isOfflineMode = false;
     List<TicketModel> loadedTickets = [];
     try {
       loadedTickets = await _ticketRepository.fetchAndSaveTickets();
     } catch (e) {
+      isOfflineMode = true;
       loadedTickets = await _ticketRepository.getStoredTickets();
     }
 
@@ -43,18 +48,41 @@ class HomeViewmodel {
   }
 
   Future<void> loadServices() async {
-    services.value = await _ticketRepository.getStoredServices();
+    _allServices = await _ticketRepository.getStoredServices();
+    services.value = _allServices;
   }
 
   Future<void> syncServices() async {
-    // Placeholder function for syncing completed services to the server
-    await Future.delayed(const Duration(seconds: 1));
-    // Re-load services after sync
+    final servicesList = await _ticketRepository.getStoredServices();
+    await _ticketRepository.uploadServices(servicesList);
     await loadServices();
   }
 
   void setTab(String tab) {
     selectedTab.value = tab;
+  }
+
+  void searchServices(String query) {
+    if (query.trim().isEmpty) {
+      services.value = _allServices;
+      return;
+    }
+
+    final lowerQuery = query.toLowerCase().trim();
+    services.value = _allServices.where((service) {
+      final idMatch = service.ticketFk.toString().toLowerCase().contains(
+        lowerQuery,
+      );
+      final codeMatch = (service.clientCode ?? '').toLowerCase().contains(
+        lowerQuery,
+      );
+      final nameMatch = (service.clientName ?? '').toLowerCase().contains(
+        lowerQuery,
+      );
+      final dateMatch = service.date.toLowerCase().contains(lowerQuery);
+
+      return idMatch || codeMatch || nameMatch || dateMatch;
+    }).toList();
   }
 
   Future<void> _processAndSortTickets(List<TicketModel> list) async {

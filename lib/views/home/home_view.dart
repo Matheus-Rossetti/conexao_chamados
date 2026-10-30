@@ -45,11 +45,16 @@ class _HomeViewState extends State<HomeView> {
     try {
       await vm.loadTickets();
       if (!mounted) return;
+
+      final message = vm.isOfflineMode
+          ? 'Você está offline. Exibindo chamados salvos localmente.'
+          : 'Chamados atualizados com sucesso!';
+      final bgColor = vm.isOfflineMode
+          ? Colors.orange.shade800
+          : AppColors.success;
+
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Chamados atualizados com sucesso!'),
-          backgroundColor: AppColors.success,
-        ),
+        SnackBar(content: Text(message), backgroundColor: bgColor),
       );
     } catch (e) {
       if (!mounted) return;
@@ -201,7 +206,10 @@ class _HomeViewState extends State<HomeView> {
                                 tabKey: 'chamados',
                                 label: 'Chamados',
                                 currentTab: currentTab,
-                                onTap: (key) => vm.setTab(key),
+                                onTap: (key) {
+                                  vm.setTab(key);
+                                  vm.searchServices('');
+                                },
                               ),
                               const SizedBox(width: 12),
                               TabButton(
@@ -245,6 +253,49 @@ class _HomeViewState extends State<HomeView> {
                     ],
                   ),
                 ),
+              ),
+
+              // Search Bar (Only appears on "atendimentos" tab)
+              ValueListenableBuilder<String>(
+                valueListenable: vm.selectedTab,
+                builder: (context, currentTab, child) {
+                  if (currentTab != 'atendimentos') {
+                    return const SliverToBoxAdapter(child: SizedBox.shrink());
+                  }
+                  return SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 4,
+                      ),
+                      child: TextField(
+                        onChanged: (val) => vm.searchServices(val),
+                        style: const TextStyle(color: AppColors.textLight),
+                        keyboardType: TextInputType.text,
+                        decoration: InputDecoration(
+                          hintText: 'Buscar atendimentos...',
+                          hintStyle: const TextStyle(
+                            color: AppColors.textMuted,
+                          ),
+                          filled: true,
+                          fillColor: AppColors.darkSlateBlue,
+                          prefixIcon: const Icon(
+                            Icons.search_rounded,
+                            color: AppColors.accentSky,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide.none,
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                },
               ),
 
               // List based on selected tab

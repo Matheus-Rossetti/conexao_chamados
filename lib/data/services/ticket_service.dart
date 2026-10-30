@@ -3,6 +3,13 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 abstract class TicketService {
   Future<Map<String, dynamic>> fetchTickets();
+  Future<bool> sendService({
+    required int ticketId,
+    required String conclusion,
+    required String description,
+    String? date,
+    String? imagePath,
+  });
 }
 
 class TicketServiceDioImpl implements TicketService {
@@ -40,6 +47,61 @@ class TicketServiceDioImpl implements TicketService {
       }
     } on DioException catch (e) {
       String errorMessage = 'Erro ao buscar chamados';
+      if (e.response?.data != null) {
+        final data = e.response?.data;
+        if (data is Map && data.containsKey('message')) {
+          errorMessage = data['message'].toString();
+        } else if (data is String) {
+          errorMessage = data;
+        }
+      } else if (e.message != null) {
+        errorMessage = e.message!;
+      }
+      throw Exception(errorMessage);
+    }
+  }
+
+  @override
+  Future<bool> sendService({
+    required int ticketId,
+    required String conclusion,
+    required String description,
+    String? date,
+    String? imagePath,
+  }) async {
+    try {
+      final token = await secureStorage.read(key: 'token');
+
+      final formDataMap = <String, dynamic>{
+        'chamado_id': ticketId,
+        'categoria_tecnico': conclusion,
+        'descricao_procedimento': description,
+      };
+
+      if (date != null && date.isNotEmpty) {
+        formDataMap['data_resolucao'] = date;
+      }
+
+      if (imagePath != null && imagePath.isNotEmpty) {
+        formDataMap['foto'] = await MultipartFile.fromFile(imagePath);
+      }
+
+      final formData = FormData.fromMap(formDataMap);
+
+      final response = await dio.post(
+        '/atendimento',
+        data: formData,
+        options: Options(
+          headers: {
+            if (token != null && token.isNotEmpty)
+              'Authorization': 'Bearer $token',
+          },
+        ),
+      );
+
+      return response.statusCode == 201;
+    } on DioException catch (e) {
+      String errorMessage = 'Erro ao enviar atendimento';
       if (e.response?.data != null) {
         final data = e.response?.data;
         if (data is Map && data.containsKey('message')) {
