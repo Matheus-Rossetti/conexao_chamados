@@ -46,6 +46,13 @@ class HomeViewmodel {
     services.value = await _ticketRepository.getStoredServices();
   }
 
+  Future<void> syncServices() async {
+    // Placeholder function for syncing completed services to the server
+    await Future.delayed(const Duration(seconds: 1));
+    // Re-load services after sync
+    await loadServices();
+  }
+
   void setTab(String tab) {
     selectedTab.value = tab;
   }

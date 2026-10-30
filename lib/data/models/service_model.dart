@@ -6,6 +6,9 @@ class ServiceModel {
   final String description;
   final String date;
   final String? imagePath;
+  final String? clientName;
+  final String? clientCode;
+  final String? category;
 
   ServiceModel({
     this.id,
@@ -15,6 +18,9 @@ class ServiceModel {
     required this.description,
     required this.date,
     this.imagePath,
+    this.clientName,
+    this.clientCode,
+    this.category,
   });
 
   factory ServiceModel.fromMap(Map<String, dynamic> map) {
@@ -32,6 +38,9 @@ class ServiceModel {
       description: map['descricao'] ?? '',
       date: map['data'] ?? '',
       imagePath: map['imagem'],
+      clientName: map['nome_cliente'],
+      clientCode: map['codigo_cliente'],
+      category: map['categoria_informada'],
     );
   }
 

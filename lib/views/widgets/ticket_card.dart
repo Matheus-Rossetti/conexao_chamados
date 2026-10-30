@@ -188,25 +188,6 @@ class TicketCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                // Sync status
-                Row(
-                  children: [
-                    Icon(
-                      Icons.cloud_done_rounded,
-                      size: 16,
-                      color: Colors.green.shade600,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      'Sincronizado',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.green.shade700,
-                      ),
-                    ),
-                  ],
-                ),
                 // Distance
                 Row(
                   children: [

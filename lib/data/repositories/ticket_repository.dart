@@ -49,7 +49,11 @@ class TicketRepository {
 
   Future<List<ServiceModel>> getStoredServices() async {
     final db = await _localDbService.database;
-    final maps = await db.query('services');
+    final maps = await db.rawQuery('''
+      SELECT s.*, t.nome_cliente, t.codigo_cliente, t.categoria_informada 
+      FROM services s
+      LEFT JOIN tickets t ON s.ticket_fk = t.id
+    ''');
     return maps.map((map) => ServiceModel.fromMap(map)).toList();
   }
 

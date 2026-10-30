@@ -4,6 +4,7 @@ import '../../core/app_colors.dart';
 import '../../data/models/service_model.dart';
 import '../../data/models/ticket_model.dart';
 import '../widgets/service_card.dart';
+import '../widgets/tab_button.dart';
 import '../widgets/ticket_card.dart';
 import 'home_viewmodel.dart';
 
@@ -40,40 +41,52 @@ class _HomeViewState extends State<HomeView> {
     });
   }
 
+  Future<void> _handleUpdate() async {
+    try {
+      await vm.loadTickets();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Chamados atualizados com sucesso!'),
+          backgroundColor: AppColors.success,
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Erro ao atualizar chamados: $e'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+    }
+  }
+
+  Future<void> _handleSync() async {
+    try {
+      await vm.syncServices();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Atendimentos sincronizados com sucesso!'),
+          backgroundColor: AppColors.success,
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Erro ao sincronizar atendimentos: $e'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+    }
+  }
+
   @override
   void dispose() {
     vm.dispose();
     super.dispose();
-  }
-
-  Widget _buildTabButton(String tabKey, String label, String currentTab) {
-    final isSelected = currentTab == tabKey;
-    return Expanded(
-      child: GestureDetector(
-        onTap: () => vm.setTab(tabKey),
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          decoration: BoxDecoration(
-            color: isSelected ? AppColors.accentSky : AppColors.darkSlateBlue,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: isSelected
-                  ? AppColors.accentSky
-                  : AppColors.accentSky.withValues(alpha: 0.3),
-            ),
-          ),
-          alignment: Alignment.center,
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.bold,
-              color: isSelected ? AppColors.deepNavy : AppColors.textLight,
-            ),
-          ),
-        ),
-      ),
-    );
   }
 
   @override
@@ -86,7 +99,13 @@ class _HomeViewState extends State<HomeView> {
         child: RefreshIndicator(
           color: AppColors.accentSky,
           backgroundColor: AppColors.darkSlateBlue,
-          onRefresh: () => vm.refreshLocalTickets(),
+          onRefresh: () async {
+            if (vm.selectedTab.value == 'chamados') {
+              await _handleUpdate();
+            } else {
+              await _handleSync();
+            }
+          },
           child: CustomScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
             slivers: [
@@ -164,28 +183,66 @@ class _HomeViewState extends State<HomeView> {
                 ),
               ),
 
-              // Tabs: "chamados" and "atendimentos" replacing "Chamados Ativos"
+              // Tabs: "chamados" and "atendimentos"
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 20,
                     vertical: 8,
                   ),
-                  child: ValueListenableBuilder<String>(
-                    valueListenable: vm.selectedTab,
-                    builder: (context, currentTab, child) {
-                      return Row(
-                        children: [
-                          _buildTabButton('chamados', 'Chamados', currentTab),
-                          const SizedBox(width: 12),
-                          _buildTabButton(
-                            'atendimentos',
-                            'Atendimentos',
-                            currentTab,
-                          ),
-                        ],
-                      );
-                    },
+                  child: Column(
+                    children: [
+                      ValueListenableBuilder<String>(
+                        valueListenable: vm.selectedTab,
+                        builder: (context, currentTab, child) {
+                          return Row(
+                            children: [
+                              TabButton(
+                                tabKey: 'chamados',
+                                label: 'Chamados',
+                                currentTab: currentTab,
+                                onTap: (key) => vm.setTab(key),
+                              ),
+                              const SizedBox(width: 12),
+                              TabButton(
+                                tabKey: 'atendimentos',
+                                label: 'Atendimentos',
+                                currentTab: currentTab,
+                                onTap: (key) => vm.setTab(key),
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 6),
+                      ValueListenableBuilder<String>(
+                        valueListenable: vm.selectedTab,
+                        builder: (context, currentTab, child) {
+                          final labelText = currentTab == 'chamados'
+                              ? 'Puxe para atualizar'
+                              : 'Puxe para sincronizar';
+                          return Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(
+                                Icons.arrow_downward,
+                                size: 12,
+                                color: AppColors.textMuted,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                labelText,
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  color: AppColors.textMuted,
+                                  fontStyle: FontStyle.italic,
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+                    ],
                   ),
                 ),
               ),
