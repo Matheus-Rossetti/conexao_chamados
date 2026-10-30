@@ -1,13 +1,12 @@
-import 'dart:async';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:geolocator/geolocator.dart';
 
 import '../../core/dependecies.dart';
+import '../../data/models/service_model.dart';
 import '../../data/models/ticket_model.dart';
-import '../../data/repositories/ticket_repository.dart';
 import '../../data/repositories/location_repository.dart';
+import '../../data/repositories/ticket_repository.dart';
 
 class HomeViewmodel {
   final TicketRepository _ticketRepository = dependencies<TicketRepository>();
@@ -17,7 +16,8 @@ class HomeViewmodel {
       dependencies<FlutterSecureStorage>();
 
   final ValueNotifier<List<TicketModel>> tickets = ValueNotifier([]);
-  Timer? _timer;
+  final ValueNotifier<List<ServiceModel>> services = ValueNotifier([]);
+  final ValueNotifier<String> selectedTab = ValueNotifier('chamados');
 
   Future<String> getTechnicianName() async {
     final name = await _secureStorage.read(key: 'technician_name');
@@ -32,42 +32,47 @@ class HomeViewmodel {
       loadedTickets = await _ticketRepository.getStoredTickets();
     }
 
-    tickets.value = loadedTickets;
-    await calculateDistancesAndSort();
-    _startPeriodicSorting();
+    await _processAndSortTickets(loadedTickets);
+    await loadServices();
   }
 
-  void _startPeriodicSorting() {
-    _timer?.cancel();
-    _timer = Timer.periodic(const Duration(seconds: 15), (_) async {
-      await calculateDistancesAndSort();
-    });
+  Future<void> refreshLocalTickets() async {
+    final storedTickets = await _ticketRepository.getStoredTickets();
+    await _processAndSortTickets(storedTickets);
+    await loadServices();
   }
 
-  Future<void> calculateDistancesAndSort() async {
+  Future<void> loadServices() async {
+    services.value = await _ticketRepository.getStoredServices();
+  }
+
+  void setTab(String tab) {
+    selectedTab.value = tab;
+  }
+
+  Future<void> _processAndSortTickets(List<TicketModel> list) async {
     final position = await _locationRepository.getCurrentPosition();
-    if (position == null) return;
 
-    final currentList = List<TicketModel>.from(tickets.value);
+    if (position != null) {
+      for (final ticket in list) {
+        final distanceMeters = Geolocator.distanceBetween(
+          position.latitude,
+          position.longitude,
+          ticket.latitude,
+          ticket.longitude,
+        );
+        ticket.distanceMeters = distanceMeters;
+        ticket.distanceFormatted = _formatDistance(distanceMeters);
+      }
 
-    for (final ticket in currentList) {
-      final distanceMeters = Geolocator.distanceBetween(
-        position.latitude,
-        position.longitude,
-        ticket.latitude,
-        ticket.longitude,
+      list.sort(
+        (a, b) => (a.distanceMeters ?? double.infinity).compareTo(
+          b.distanceMeters ?? double.infinity,
+        ),
       );
-      ticket.distanceMeters = distanceMeters;
-      ticket.distanceFormatted = _formatDistance(distanceMeters);
     }
 
-    currentList.sort(
-      (a, b) => (a.distanceMeters ?? double.infinity).compareTo(
-        b.distanceMeters ?? double.infinity,
-      ),
-    );
-
-    tickets.value = currentList;
+    tickets.value = list;
   }
 
   String _formatDistance(double meters) {
@@ -79,7 +84,8 @@ class HomeViewmodel {
   }
 
   void dispose() {
-    _timer?.cancel();
     tickets.dispose();
+    services.dispose();
+    selectedTab.dispose();
   }
 }

@@ -472,7 +472,7 @@ class _TicketViewState extends State<TicketView> {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                           content: Text('Atendimento salvo com sucesso!'),
-                          backgroundColor: Colors.green,
+                          backgroundColor: AppColors.success,
                         ),
                       );
                       Navigator.of(context).pop();

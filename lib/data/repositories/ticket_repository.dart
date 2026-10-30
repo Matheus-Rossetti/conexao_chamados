@@ -27,23 +27,30 @@ class TicketRepository {
             await txn.insert(
               'tickets',
               ticket.toMap(),
-              conflictAlgorithm: ConflictAlgorithm.replace,
+              conflictAlgorithm: ConflictAlgorithm.ignore,
             );
           }
         });
-
-        return tickets;
       }
-      return await getStoredTickets();
-    } catch (e) {
-      return await getStoredTickets();
-    }
+    } catch (_) {}
+
+    return await getStoredTickets();
   }
 
   Future<List<TicketModel>> getStoredTickets() async {
     final db = await _localDbService.database;
-    final maps = await db.query('tickets');
+    final maps = await db.query(
+      'tickets',
+      where: 'status = ?',
+      whereArgs: ['ativo'],
+    );
     return maps.map((map) => TicketModel.fromMap(map)).toList();
+  }
+
+  Future<List<ServiceModel>> getStoredServices() async {
+    final db = await _localDbService.database;
+    final maps = await db.query('services');
+    return maps.map((map) => ServiceModel.fromMap(map)).toList();
   }
 
   Future<int> saveService({

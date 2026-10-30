@@ -7,14 +7,17 @@ import '../../data/models/ticket_model.dart';
 
 class TicketCard extends StatelessWidget {
   final TicketModel ticket;
+  final VoidCallback callback;
 
-  const TicketCard({super.key, required this.ticket});
+  const TicketCard({super.key, required this.ticket, required this.callback});
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
-        Navigator.of(context).pushNamed(AppRoutes.ticket, arguments: ticket);
+      onTap: () async {
+        await Navigator.of(context)
+            .pushNamed(AppRoutes.ticket, arguments: ticket);
+        callback.call();
       },
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),

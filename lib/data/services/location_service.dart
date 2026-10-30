@@ -5,6 +5,8 @@ abstract class LocationService {
 }
 
 class LocationServiceImpl implements LocationService {
+  Position? _cachedPosition;
+
   @override
   Future<Position?> getCurrentPosition() async {
     bool serviceEnabled;
@@ -12,29 +14,31 @@ class LocationServiceImpl implements LocationService {
 
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
-      return null;
+      return _cachedPosition ?? await Geolocator.getLastKnownPosition();
     }
 
     permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
-        return null;
+        return _cachedPosition ?? await Geolocator.getLastKnownPosition();
       }
     }
 
     if (permission == LocationPermission.deniedForever) {
-      return null;
+      return _cachedPosition ?? await Geolocator.getLastKnownPosition();
     }
 
     try {
-      return await Geolocator.getCurrentPosition(
+      final position = await Geolocator.getCurrentPosition(
         locationSettings: const LocationSettings(
           accuracy: LocationAccuracy.high,
         ),
       );
+      _cachedPosition = position;
+      return position;
     } catch (_) {
-      return null;
+      return _cachedPosition ?? await Geolocator.getLastKnownPosition();
     }
   }
 }
